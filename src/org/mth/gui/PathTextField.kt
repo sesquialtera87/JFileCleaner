@@ -4,8 +4,7 @@ import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.KeyboardFocusManager
 import java.awt.Window
-import java.awt.event.KeyAdapter
-import java.awt.event.KeyEvent
+import java.awt.event.*
 import java.io.File
 import javax.swing.*
 import javax.swing.event.DocumentEvent
@@ -47,6 +46,20 @@ class PathTextField : JTextField() {
     }
 
     init {
+        actionMap.put("delete-previous-word", object : AbstractAction() {
+            override fun actionPerformed(e: ActionEvent) {
+                // if the caret is next to a separator char, then we need to search for another separator antecedent to this
+                if (caretPosition > 0)
+                    if (document.getText(caretPosition - 1, 1)[0] in pathSeparators) {
+                        // remove the first separator sign
+                        document.remove(caretPosition - 1, 1)
+                    }
+
+                val separatorIndex = getSeparatorIndex()
+                document.remove(separatorIndex + 1, document.length - separatorIndex - 1)
+            }
+        })
+
         setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, emptySet())
 
         with(popup) {
@@ -54,6 +67,15 @@ class PathTextField : JTextField() {
             minimumSize = Dimension(150, 200)
             add(JScrollPane(completionList), BorderLayout.CENTER)
         }
+
+        completionList.addMouseListener(object : MouseAdapter() {
+            override fun mouseClicked(e: MouseEvent) {
+                if (e.clickCount == 2 && e.button == MouseEvent.BUTTON1) {
+                    injectCompletion(getSeparatorIndex(), completionList.selectedValue)
+                    popup.isVisible = false
+                }
+            }
+        })
 
         document.addDocumentListener(documentListener)
 
@@ -125,8 +147,7 @@ class PathTextField : JTextField() {
 
     private fun injectCompletion(separatorPosition: Int, completion: String) {
         document.remove(separatorPosition + 1, document.length - separatorPosition - 1)
-        document.insertString(separatorPosition + 1, completion, null)
-        document.insertString(document.length, "\\", null)
+        document.insertString(separatorPosition + 1, completion + "\\", null)
     }
 
     private fun getSeparatorIndex(): Int {
@@ -148,10 +169,16 @@ class PathTextField : JTextField() {
         if (separatorIndex < 0)
             return
 
-        val parentPath = File(text.substring(0, separatorIndex))
+        var parent = text.substring(0, separatorIndex)
         val partialInput = text.substring(separatorIndex + 1, caretPosition).lowercase()
 
-        println(parentPath)
+        if (parent.matches("[A-Z]:".toRegex())) {
+            parent += "\\"
+        }
+
+        val parentPath = File(parent)
+
+        println(parent)
         println(partialInput)
 
         if (!parentPath.exists()) {
@@ -185,7 +212,7 @@ fun main() {
     JFrame().apply {
         layout = BorderLayout()
         preferredSize = Dimension(500, 300)
-        add(PathTextField(), BorderLayout.NORTH)
+        add(PathTextField().apply { text = "C:\\" }, BorderLayout.NORTH)
         pack()
         defaultCloseOperation = JFrame.EXIT_ON_CLOSE
         isVisible = true
