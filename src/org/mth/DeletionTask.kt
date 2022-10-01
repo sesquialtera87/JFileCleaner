@@ -6,26 +6,47 @@ import java.io.IOException
 import javax.swing.SwingWorker
 
 
-class DeletionTask(val directory: File, val extensions: Set<String>, val toTrash: Boolean) : SwingWorker<Unit, Unit>() {
+class DeletionTask(val directory: File, val extensions: Set<String>, val toTrash: Boolean, val recursive: Boolean) :
+    SwingWorker<Unit, Unit>() {
 
     var deletionCounter = 0
 
     override fun doInBackground() {
         Logger.message(formattedTimeStamp(), Logger.timestampStyle)
 
-        val files = directory.listFiles()!!
-            .filter { it.isFile }
-            .filter { it.extension() in extensions }
+        if (recursive)
+            recursiveDeletion(directory)
+        else {
+            val files = directory.listFiles()!!
+                .filter { it.isFile }
+                .filter { it.extension() in extensions }
 
-        if (files.isEmpty()) {
-            Logger.message("Nothing to do")
-            return
+            if (files.isEmpty()) {
+                Logger.message("Nothing to do")
+                return
+            }
+
+            if (toTrash)
+                moveFilesToTrash(files)
+            else
+                deleteFiles(files)
         }
+    }
 
-        if (toTrash)
-            moveFilesToTrash(files)
-        else
-            deleteFiles(files)
+    private fun recursiveDeletion(path: File) {
+        val fileCollection = path.listFiles()
+
+        if (fileCollection != null) {
+            val (files, directories) = fileCollection.partition { it.isFile }
+
+            if (toTrash)
+                files.filter { it.extension() in extensions }
+                    .forEach { it.toTrash() }
+            else
+                deleteFiles(files.filter { it.extension() in extensions })
+
+            directories.forEach { recursiveDeletion(it) }
+        }
     }
 
     private fun deleteFiles(files: List<File>) {
@@ -50,6 +71,27 @@ class DeletionTask(val directory: File, val extensions: Set<String>, val toTrash
         }
 
         Logger.message("$deletionCounter files deleted\n", Logger.greenStyle)
+    }
+
+    fun File.toTrash(): Boolean {
+        val bold = Logger.defaultStyle.bold()
+
+        try {
+            val succeeded = Desktop.getDesktop().moveToTrash(this)
+
+            if (succeeded) {
+                deletionCounter++
+                Logger.append("- ")
+                    .append(this.name, bold)
+                    .append(" deleted\n")
+            } else
+                Logger.message("- Cannot delete ${this.name}")
+        } catch (e: SecurityException) {
+            Logger.message("- Cannot delete ${this.name}")
+            return false
+        }
+
+        return true
     }
 
     private fun moveFilesToTrash(files: List<File>) {

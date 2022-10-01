@@ -7,8 +7,10 @@ import java.awt.Window
 import java.awt.event.*
 import java.io.File
 import javax.swing.*
+import javax.swing.KeyStroke.getKeyStroke
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
+import kotlin.math.min
 
 class PathTextField : JTextField() {
 
@@ -46,19 +48,18 @@ class PathTextField : JTextField() {
     }
 
     init {
-        actionMap.put("delete-previous-word", object : AbstractAction() {
-            override fun actionPerformed(e: ActionEvent) {
-                // if the caret is next to a separator char, then we need to search for another separator antecedent to this
-                if (caretPosition > 0)
-                    if (document.getText(caretPosition - 1, 1)[0] in pathSeparators) {
-                        // remove the first separator sign
-                        document.remove(caretPosition - 1, 1)
-                    }
+        mapOf(
+            getKeyStroke("ESCAPE") to "cancel-completion",
+            getKeyStroke("DOWN") to "next-completion",
+            getKeyStroke("UP") to "previous-completion",
+            getKeyStroke("control O") to "browse",
+            getKeyStroke("TAB") to "complete",
+        ).forEach { (accelerator, actionId) -> inputMap.put(accelerator, actionId) }
 
-                val separatorIndex = getSeparatorIndex()
-                document.remove(separatorIndex + 1, document.length - separatorIndex - 1)
-            }
-        })
+        actionMap.put("complete", CompleteAction())
+        actionMap.put("next-completion", NextCompletionAction())
+        actionMap.put("previous-completion", PreviousCompletionAction())
+        actionMap.put("delete-previous-word", DeletePreviousFolderAction())
 
         setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, emptySet())
 
@@ -83,34 +84,6 @@ class PathTextField : JTextField() {
             override fun keyPressed(e: KeyEvent) {
 
                 when (e.keyCode) {
-                    KeyEvent.VK_SPACE -> {
-                        if (e.isControlDown) {
-                            println("completion request")
-                            completeAtCaret()
-                        }
-                    }
-                    KeyEvent.VK_TAB -> {
-                        println("completion request")
-                        completeAtCaret()
-                    }
-                    KeyEvent.VK_DOWN -> {
-                        if (popup.isVisible)
-                            with(completionList) {
-                                if (selectedIndex < completionListModel.size() - 1) {
-                                    selectedIndex++
-                                    scrollRectToVisible(getCellBounds(selectedIndex, selectedIndex))
-                                }
-                            }
-                    }
-                    KeyEvent.VK_UP -> {
-                        if (popup.isVisible)
-                            with(completionList) {
-                                if (selectedIndex > 0) {
-                                    selectedIndex--
-                                    scrollRectToVisible(getCellBounds(selectedIndex, selectedIndex))
-                                }
-                            }
-                    }
                     KeyEvent.VK_ENTER -> {
                         if (popup.isVisible) {
                             injectCompletion(getSeparatorIndex(), completionList.selectedValue)
@@ -134,11 +107,14 @@ class PathTextField : JTextField() {
     }
 
     private fun showPopup() {
-        if (completionListModel.isEmpty)
+        if (completionListModel.isEmpty) {
+            popup.isVisible = false
             return
+        }
 
         val stringWidth = graphics.fontMetrics.stringWidth(text.substring(0, caretPosition))
-        popup.setLocation(locationOnScreen.x + stringWidth, locationOnScreen.y + height + 1)
+        val delta = min(stringWidth, width - popup.width)
+        popup.setLocation(locationOnScreen.x + delta, locationOnScreen.y + height + 1)
         popup.isVisible = true
         popup.requestFocus()
 
@@ -146,8 +122,11 @@ class PathTextField : JTextField() {
     }
 
     private fun injectCompletion(separatorPosition: Int, completion: String) {
+        document.removeDocumentListener(documentListener)
         document.remove(separatorPosition + 1, document.length - separatorPosition - 1)
         document.insertString(separatorPosition + 1, completion + "\\", null)
+        document.addDocumentListener(documentListener)
+        caretPosition = document.length
     }
 
     private fun getSeparatorIndex(): Int {
@@ -178,8 +157,7 @@ class PathTextField : JTextField() {
 
         val parentPath = File(parent)
 
-        println(parent)
-        println(partialInput)
+        println("parent=$parentPath, hint=$partialInput")
 
         if (!parentPath.exists()) {
             System.err.println("Invalid directory")
@@ -188,9 +166,11 @@ class PathTextField : JTextField() {
 
         val completions = getCompletions(partialInput, parentPath)
 
-        if (completions.size == 1) {
+        if (completions.isEmpty()) {
+            popup.isVisible = false
+        }/* else if (completions.size == 1) {
             injectCompletion(separatorIndex, completions.first())
-        } else {
+        } */ else {
             buildPopup(completions)
             showPopup()
         }
@@ -205,6 +185,57 @@ class PathTextField : JTextField() {
             }
 
         return files?.map { it.name } ?: emptyList()
+    }
+
+    inner class NextCompletionAction : AbstractAction() {
+        override fun actionPerformed(e: ActionEvent) {
+            if (popup.isVisible)
+                with(completionList) {
+                    selectedIndex = (selectedIndex + 1) % completionListModel.size()
+                    scrollRectToVisible(getCellBounds(selectedIndex, selectedIndex))
+                }
+        }
+    }
+
+    inner class PreviousCompletionAction : AbstractAction() {
+        override fun actionPerformed(e: ActionEvent) {
+            if (popup.isVisible)
+                with(completionList) {
+                    if (selectedIndex > 0)
+                        selectedIndex--
+                    else
+                        selectedIndex = completionListModel.size() - 1
+
+                    scrollRectToVisible(getCellBounds(selectedIndex, selectedIndex))
+                }
+        }
+    }
+
+    inner class DeletePreviousFolderAction : AbstractAction() {
+        override fun actionPerformed(e: ActionEvent) {
+            // if the caret is next to a separator char, then we need to search for another separator antecedent to this
+            if (caretPosition > 0)
+                if (document.getText(caretPosition - 1, 1)[0] in pathSeparators) {
+                    // remove the first separator sign
+                    document.remove(caretPosition - 1, 1)
+                }
+
+            val separatorIndex = getSeparatorIndex()
+            document.remove(separatorIndex + 1, document.length - separatorIndex - 1)
+        }
+    }
+
+    inner class CompleteAction : AbstractAction() {
+        override fun actionPerformed(e: ActionEvent) {
+            if (popup.isVisible) {
+                // accept the selection
+                injectCompletion(getSeparatorIndex(), completionList.selectedValue)
+                completeAtCaret()
+            } else {
+                // make a completion request
+                completeAtCaret()
+            }
+        }
     }
 }
 

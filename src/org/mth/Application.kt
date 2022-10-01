@@ -14,7 +14,6 @@ import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
 import java.io.File
 import java.nio.file.Files
-import java.nio.file.Paths
 import java.util.function.Consumer
 import javax.swing.*
 import javax.swing.KeyStroke.getKeyStroke
@@ -27,6 +26,7 @@ object Application : JFrame() {
     private val extensionList = JExtensionList()
     private val fileChooser = JFileChooser()
     private val trashCheckBox = JCheckBox()
+    private val recursionCheckBox = JCheckBox()
     private val logArea = JTextPane()
 
     init {
@@ -41,6 +41,7 @@ object Application : JFrame() {
         extensionList.componentPopupMenu = createExtensionListPopup()
 
         with(directoryField) {
+            actionMap.put("browse", BrowseAction)
             action = SelectDirectoryAction
             // add drop capability to the TextField
 
@@ -61,6 +62,11 @@ object Application : JFrame() {
             text = "Use system trash"
             isSelected = Desktop.getDesktop().isSupported(Desktop.Action.MOVE_TO_TRASH)
             isEnabled = Desktop.getDesktop().isSupported(Desktop.Action.MOVE_TO_TRASH)
+            alignmentX = JComponent.LEFT_ALIGNMENT
+        }
+
+        with(recursionCheckBox) {
+            text = "Recurse in sub-folders"
             alignmentX = JComponent.LEFT_ALIGNMENT
         }
 
@@ -99,6 +105,7 @@ object Application : JFrame() {
             add(listScroll)
             add(Box.createRigidArea(Dimension(0, 4)))
             add(trashCheckBox)
+            add(recursionCheckBox)
         }
 
         val logLabel = JLabel().apply {
@@ -307,7 +314,8 @@ object Application : JFrame() {
             val task = DeletionTask(
                 directory = currentDirectory,
                 extensions = extensionList.getCheckedExtensions().toSet(),
-                toTrash = trashCheckBox.isSelected
+                toTrash = trashCheckBox.isSelected,
+                recursive = recursionCheckBox.isSelected
             )
             task.addPropertyChangeListener {
                 if (it.propertyName == "state" && it.newValue == SwingWorker.StateValue.DONE) {

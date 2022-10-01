@@ -7,14 +7,20 @@ import org.mth.sqlite.MyBatisHelperKt;
 import javax.swing.*;
 
 public class Launcher {
-    public static void main(String[] args) throws UnsupportedLookAndFeelException {
+    public static void main(String[] args) {
         MyBatisHelperKt.connectToPreferencesDatabase();
 
         ApplicationKt.randomFiles(10);
 
-        UIManager.setLookAndFeel(new FlatDarculaLaf());
-        new UIFix().fix();
+        SwingUtilities.invokeLater(() -> {
+            try {
+                UIManager.setLookAndFeel(new FlatDarculaLaf());
+                new UIFix().fix();
+            } catch (UnsupportedLookAndFeelException e) {
+                e.printStackTrace();
+            }
 
-        Application.INSTANCE.setVisible(true);
+            Application.INSTANCE.setVisible(true);
+        });
     }
 }
