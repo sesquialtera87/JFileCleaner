@@ -1,5 +1,6 @@
 package org.mth.gui
 
+import java.awt.Color
 import java.awt.Component
 import java.awt.Font
 import javax.swing.JCheckBox
@@ -9,18 +10,18 @@ import javax.swing.ListCellRenderer
 class MyCellRenderer : JCheckBox(), ListCellRenderer<Any> {
 
     override fun getListCellRendererComponent(
-            list: JList<*>,
-            value: Any,
-            index: Int,
-            isSelected: Boolean,
-            hasFocus: Boolean
+        list: JList<*>,
+        value: Any,
+        index: Int,
+        isSelected: Boolean,
+        hasFocus: Boolean,
     ): Component {
-        val item = value as JExtensionList.CheckboxListItem
+        val checkboxItem = value as JExtensionList.CheckboxListItem
 
         // configures the selected value of the CheckBox
-        setSelected(item.isSelected)
+        setSelected(checkboxItem.isSelected)
 
-        if (item.isSelected) {
+        if (checkboxItem.isSelected) {
             font = list.font.deriveFont(Font.BOLD)
             foreground = list.foreground
         } else {
@@ -28,8 +29,13 @@ class MyCellRenderer : JCheckBox(), ListCellRenderer<Any> {
             foreground = list.foreground
         }
 
+        if (checkboxItem.userDefined) {
+            foreground = Color.ORANGE
+            font = font.deriveFont(Font.ITALIC)
+        }
+
         background = list.background
-        text = item.extension
+        text = checkboxItem.extension
         isEnabled = list.isEnabled
 
         return this

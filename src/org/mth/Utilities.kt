@@ -106,6 +106,7 @@ class MyVisitor(
     }
 }
 
+val PATH_SEPARATOR = System.getProperty("file.separator")
 
 private val LINUX_TRASH = File(
     System.getProperty("user.home")
@@ -165,24 +166,6 @@ private val standardDeletingFunction = fun(file: File): Boolean {
 
 fun clearEmptySubfolders(dir: File, useTrash: Boolean, responseDigest: (TraversingResponse) -> Unit = {}) {
     Files.walkFileTree(dir.toPath(), MyVisitor(useTrash, responseDigest))
-}
-
-fun getTopWindow(component: JComponent): Optional<JFrame> {
-    var parent = component.parent
-    var found = false
-
-    while (parent != null) {
-        if (parent is JFrame) {
-            found = true
-            break
-        } else
-            parent = parent.parent
-    }
-
-    return if (found)
-        Optional.ofNullable(parent as JFrame)
-    else
-        Optional.empty<JFrame>()
 }
 
 /**

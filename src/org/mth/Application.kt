@@ -216,20 +216,27 @@ object Application : JFrame() {
     }
 
     private fun findExtensions(dir: File) {
-        /* delete all list elements */
+        val userDefinedExtensions = extensionList.getUserDefinedExtensions()
         extensionList.clear()
 
-        /* ottiene tutti i file */
-        val files: Array<File> = dir.listFiles { obj: File -> obj.isFile }!!
+        /* get all files in the directory */
+        val files: Array<File> = dir.listFiles { file: File -> file.isFile }!!
 
-        files.map { file -> getExtension(file) }
+        val filesWithFrequencies = files.map { file -> getExtension(file) }
             .sorted()
             .groupingBy { it }
             .eachCount()
-            .forEach { (extension, frequency) ->
-                extensionList.addExtension(extension, frequency)
-            }
+            .toMutableMap()
 
+        userDefinedExtensions.forEach {
+            if (!filesWithFrequencies.containsKey(it.extension)) {
+                filesWithFrequencies[it.extension] = 0
+            }
+        }
+
+        filesWithFrequencies.forEach { (extension, frequency) ->
+            extensionList.addExtension(extension, frequency, frequency == 0)
+        }
     }
 
     fun update(directory: File) {
@@ -240,7 +247,7 @@ object Application : JFrame() {
 
         currentDirectory = directory
 
-        directoryField.text = currentDirectory.absolutePath
+        directoryField.text = currentDirectory.absolutePath + PATH_SEPARATOR
 
         findExtensions(currentDirectory)
 
