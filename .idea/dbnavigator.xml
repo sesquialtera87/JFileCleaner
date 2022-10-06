@@ -38,9 +38,7 @@ select * from "Folders"]]></console>
     </connection>
   </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
-    <open-files>
-      <object connection-id="15e5db74-0e37-48f9-9d7b-05777b46cbaa" object-ref="schemas/main/tables/Folders" />
-    </open-files>
+    <open-files />
   </component>
   <component name="DBNavigator.Project.DatabaseSessionManager">
     <connection id="15e5db74-0e37-48f9-9d7b-05777b46cbaa" />
@@ -99,7 +97,7 @@ select * from "Folders"]]></console>
           <deprecated-pwd value="" />
         </database>
         <properties>
-          <auto-commit value="false" />
+          <auto-commit value="true" />
         </properties>
         <ssh-settings>
           <active value="false" />

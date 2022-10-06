@@ -219,11 +219,8 @@ object Application : JFrame() {
         /* delete all list elements */
         extensionList.clear()
 
-        /* ottiene tutte le sottocartelle */
-        var files = dir.listFiles { obj: File -> obj.isDirectory }!!
-
         /* ottiene tutti i file */
-        files = dir.listFiles { obj: File -> obj.isFile }!!
+        val files: Array<File> = dir.listFiles { obj: File -> obj.isFile }!!
 
         files.map { file -> getExtension(file) }
             .sorted()
@@ -254,8 +251,9 @@ object Application : JFrame() {
             if (folder != null) {
                 val fileExtensions = selectList<FileExtension>("select-associated-extensions", folder)
                     .map { it.extension }
-
+                println("RECURSION = " + folder.recursive)
                 extensionList.select(fileExtensions)
+                recursionCheckBox.isSelected = folder.recursionEnabled()
 
                 Logger.icon(FontIcon.of(FontAwesome.INFO, 11, Color(172, 107, 121)))
                     .append("Saved extensions found for this folder: ")
@@ -334,8 +332,14 @@ object Application : JFrame() {
 
                 // if the path was not found, create a new row in the database
                 if (folder == null) {
-                    folder = Folder(directory.absolutePath)
+                    folder = Folder(directory.absolutePath, recursionCheckBox.isSelected)
+
                     insert("insert-path", folder)
+                } else {
+                    // update recursion flag
+                    folder.recursive = if (recursionCheckBox.isSelected) 1 else 0
+
+                    update("update-folder", folder)
                 }
 
                 commit()

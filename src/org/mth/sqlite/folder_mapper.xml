@@ -9,17 +9,18 @@
     <resultMap id="FolderMap" type="Folder">
         <id column="id" javaType="int" property="id"/>
         <result column="path" javaType="string" property="path"/>
+        <result column="recursive" property="recursive" javaType="short"/>
     </resultMap>
 
 
     <select id="select-all-folders" resultMap="FolderMap">
-        SELECT id, path FROM Folders
+        SELECT id, path, recursive FROM Folders
         ORDER BY id ASC
     </select>
 
 
     <select id="select-by-path" resultMap="FolderMap" parameterType="string">
-        SELECT id, path FROM Folders
+        SELECT id, path, recursive FROM Folders
         WHERE path = '${path}'
     </select>
 
@@ -36,9 +37,16 @@
     </select>
 
     <insert id="insert-path" keyProperty="id" useGeneratedKeys="true" parameterType="Folder">
-        INSERT INTO Folders (path)
-        VALUES ( #{path} )
+        INSERT INTO Folders (path, recursive)
+        VALUES ( #{path}, #{recursive} )
     </insert>
+
+    <update id="update-folder" parameterType="Folder" statementType="PREPARED">
+        UPDATE Folders SET
+        path = #{path},
+        recursive = #{recursive}
+        WHERE id = #{id}
+    </update>
 
     <delete id="delete-all-associated-extensions" parameterType="Folder" statementType="PREPARED">
         DELETE FROM Folder_To_Extension
