@@ -50,6 +50,7 @@ class JExtensionList : JList<JExtensionList.CheckboxListItem>() {
     }
 
     fun checkAll(allChecked: Boolean = true) {
+        println(SwingUtilities.isEventDispatchThread())
         model!!.elements().asSequence().forEach { it.isSelected = allChecked }
         repaint()
     }

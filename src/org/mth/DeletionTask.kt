@@ -73,7 +73,7 @@ class DeletionTask(val directory: File, val extensions: Set<String>, val toTrash
         Logger.message("$deletionCounter files deleted\n", Logger.greenStyle)
     }
 
-    fun File.toTrash(): Boolean {
+    private fun File.toTrash(): Boolean {
         val bold = Logger.defaultStyle.bold()
 
         try {

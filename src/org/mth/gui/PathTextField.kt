@@ -19,7 +19,7 @@ class PathTextField : JTextField() {
     private val completionList = JList(completionListModel)
     private val pathSeparators = setOf('\\', '/')
     private val documentListener = object : DocumentListener {
-        override fun insertUpdate(e: DocumentEvent?) {
+        override fun insertUpdate(e: DocumentEvent) {
             println("insert")
 
             if (popup.isVisible) {
@@ -34,12 +34,31 @@ class PathTextField : JTextField() {
                     }
                 }
 
-                completionList.selectedIndex = 0
+                if (completionListModel.isEmpty)
+                    popup.isVisible = false
+                else
+                    completionList.selectedIndex = 0
             }
         }
 
-        override fun removeUpdate(e: DocumentEvent?) {
-            println("remove")
+        override fun removeUpdate(e: DocumentEvent) {
+            if (popup.isVisible) {
+                println("REMOVE")
+                val separatorPosition = getSeparatorIndex()
+                val partialInput = text.substring(separatorPosition + 1, caretPosition + 1).lowercase()
+                println("hint = $partialInput")
+
+                for (i in completionListModel.size() - 1 downTo 0) {
+                    if (!completionListModel[i].lowercase().startsWith(partialInput)) {
+                        completionListModel.remove(i)
+                    }
+                }
+
+                if (completionListModel.isEmpty)
+                    popup.isVisible = false
+                else
+                    completionList.selectedIndex = 0
+            }
         }
 
         override fun changedUpdate(e: DocumentEvent?) {
@@ -57,6 +76,7 @@ class PathTextField : JTextField() {
         ).forEach { (accelerator, actionId) -> inputMap.put(accelerator, actionId) }
 
         actionMap.put("complete", CompleteAction())
+        actionMap.put("cancel-completion", CancelCompletionAction())
         actionMap.put("next-completion", NextCompletionAction())
         actionMap.put("previous-completion", PreviousCompletionAction())
         actionMap.put("delete-previous-word", DeletePreviousFolderAction())
@@ -90,7 +110,6 @@ class PathTextField : JTextField() {
                             popup.isVisible = false
                         }
                     }
-                    KeyEvent.VK_ESCAPE -> popup.isVisible = false
                 }
             }
 
@@ -235,6 +254,12 @@ class PathTextField : JTextField() {
                 // make a completion request
                 completeAtCaret()
             }
+        }
+    }
+
+    inner class CancelCompletionAction : AbstractAction() {
+        override fun actionPerformed(e: ActionEvent) {
+            popup.isVisible = false
         }
     }
 }
