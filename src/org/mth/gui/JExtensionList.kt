@@ -16,17 +16,22 @@ class JExtensionList : JList<JExtensionList.CheckboxListItem>() {
         addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(event: MouseEvent) {
                 if (SwingUtilities.isLeftMouseButton(event)) {
-                    // Get index of item clicked
+                    // Get the closest index of item clicked
                     val index = locationToIndex(event.point)
 
                     if (index >= 0) {
-                        val item = model!!.getElementAt(index)
+                        val cellBounds = getCellBounds(index, index)
 
-                        // Toggle selected state
-                        item.isSelected = !item.isSelected
+                        // check if the click happened on the cell
+                        if (cellBounds.contains(event.point)) {
+                            val item = model!!.getElementAt(index)
 
-                        // Repaint cell
-                        repaint(getCellBounds(index, index))
+                            // Toggle selected state
+                            item.isSelected = !item.isSelected
+
+                            // Repaint cell
+                            repaint(cellBounds)
+                        }
                     }
                 }
             }
@@ -106,7 +111,7 @@ class JExtensionList : JList<JExtensionList.CheckboxListItem>() {
     }
 
 
-    data class CheckboxListItem(val extension: String) {
+    data class CheckboxListItem(val extension: String, val userDefined: Boolean = false) {
         var isSelected = false
         var fileCounter = 0
     }
