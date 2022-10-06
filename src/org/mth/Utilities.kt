@@ -11,6 +11,8 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.*
+import javax.swing.JComponent
+import javax.swing.JFrame
 import javax.swing.SwingUtilities
 import javax.swing.text.MutableAttributeSet
 import javax.swing.text.SimpleAttributeSet
@@ -20,7 +22,7 @@ import javax.swing.text.StyleConstants
 
 class MyVisitor(
     private val useTrash: Boolean,
-    private val responseDigest: (TraversingResponse) -> Unit
+    private val responseDigest: (TraversingResponse) -> Unit,
 ) : FileVisitor<Path> {
 
     inner class VisitorItem constructor(val path: Path) {
@@ -163,6 +165,24 @@ private val standardDeletingFunction = fun(file: File): Boolean {
 
 fun clearEmptySubfolders(dir: File, useTrash: Boolean, responseDigest: (TraversingResponse) -> Unit = {}) {
     Files.walkFileTree(dir.toPath(), MyVisitor(useTrash, responseDigest))
+}
+
+fun getTopWindow(component: JComponent): Optional<JFrame> {
+    var parent = component.parent
+    var found = false
+
+    while (parent != null) {
+        if (parent is JFrame) {
+            found = true
+            break
+        } else
+            parent = parent.parent
+    }
+
+    return if (found)
+        Optional.ofNullable(parent as JFrame)
+    else
+        Optional.empty<JFrame>()
 }
 
 /**
