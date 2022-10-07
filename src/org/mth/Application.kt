@@ -14,6 +14,7 @@ import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
 import java.io.File
 import java.nio.file.Files
+import java.util.Optional
 import java.util.function.Consumer
 import javax.swing.*
 import javax.swing.KeyStroke.getKeyStroke
@@ -21,13 +22,14 @@ import javax.swing.border.EmptyBorder
 
 object Application : JFrame() {
 
-    private var currentDirectory: File = File(System.getProperty("user.dir"), "file_test")
+    var currentDirectory: File = File(System.getProperty("user.dir"), "file_test")
     private val directoryField = PathTextField()
     private val extensionList = JExtensionList()
     private val fileChooser = JFileChooser()
     private val trashCheckBox = JCheckBox()
     private val recursionCheckBox = JCheckBox()
     private val logArea = JTextPane()
+    private val scheduler = java.util.Timer()
 
     init {
         Logger.initialize(logArea)
@@ -155,6 +157,8 @@ object Application : JFrame() {
         setLocationRelativeTo(null)
 
         update(currentDirectory)
+
+        scheduler.schedule(ExtensionRefresher(extensionList), 60000)
     }
 
     private fun createExtensionListPopup(): JPopupMenu {
@@ -163,7 +167,11 @@ object Application : JFrame() {
         popup.add(JMenuItem().apply {
             text = "Reload"
             icon = FontIcon.of(FontAwesome.REFRESH, 14, Color.LIGHT_GRAY)
-            addActionListener { findExtensions(currentDirectory) }
+            addActionListener {
+                val extensions = extensionList.getCheckedExtensions()
+                findExtensions(currentDirectory)
+                extensionList.select(extensions)
+            }
         })
         popup.add(JMenuItem().apply {
             text = "Select all"
@@ -215,7 +223,7 @@ object Application : JFrame() {
             })
     }
 
-    private fun findExtensions(dir: File) {
+    fun findExtensions(dir: File) {
         val userDefinedExtensions = extensionList.getUserDefinedExtensions()
         extensionList.clear()
 
@@ -311,23 +319,45 @@ object Application : JFrame() {
     }
 
     object DeleteAction : AbstractAction() {
+        var deletionBehavior = true
+        var task = Optional.empty<DeletionTask>()
+
         init {
             putValue(ACCELERATOR_KEY, getKeyStroke("ctrl M"))
         }
 
         override fun actionPerformed(e: ActionEvent) {
-            val task = DeletionTask(
-                directory = currentDirectory,
-                extensions = extensionList.getCheckedExtensions().toSet(),
-                toTrash = trashCheckBox.isSelected,
-                recursive = recursionCheckBox.isSelected
-            )
-            task.addPropertyChangeListener {
-                if (it.propertyName == "state" && it.newValue == SwingWorker.StateValue.DONE) {
-                    findExtensions(currentDirectory)
+            if (deletionBehavior) {
+                val deletionTask = DeletionTask(
+                    directory = currentDirectory,
+                    extensions = extensionList.getCheckedExtensions().toSet(),
+                    toTrash = trashCheckBox.isSelected,
+                    recursive = recursionCheckBox.isSelected
+                )
+                deletionTask.addPropertyChangeListener {
+                    if (deletionTask.state == SwingWorker.StateValue.DONE) {
+                        findExtensions(currentDirectory)
+
+                        deletionBehavior = true
+
+                        putValue(NAME, "Clear")
+                        putValue(DISPLAYED_MNEMONIC_INDEX_KEY, 1)
+                    } else if (deletionTask.state == SwingWorker.StateValue.STARTED) {
+                        deletionBehavior = false
+
+                        putValue(NAME, "Cancel")
+                        putValue(DISPLAYED_MNEMONIC_INDEX_KEY, 1)
+                    }
+                }
+                deletionTask.execute()
+
+                task = Optional.of(deletionTask)
+            } else {
+                task.ifPresent {
+                    val cancelled = it.cancel(false)
+                    println("Task cancelled = $cancelled")
                 }
             }
-            task.execute()
         }
     }
 

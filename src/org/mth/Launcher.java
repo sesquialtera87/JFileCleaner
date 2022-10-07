@@ -10,7 +10,7 @@ public class Launcher {
     public static void main(String[] args) {
         MyBatisHelperKt.connectToPreferencesDatabase();
 
-        ApplicationKt.randomFiles(10);
+        ApplicationKt.randomFiles(30);
 
         SwingUtilities.invokeLater(() -> {
             try {

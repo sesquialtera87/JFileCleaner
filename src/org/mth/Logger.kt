@@ -6,6 +6,7 @@ import java.awt.Color
 import javax.swing.Icon
 import javax.swing.ImageIcon
 import javax.swing.JTextPane
+import javax.swing.SwingUtilities
 import javax.swing.text.*
 import javax.swing.text.StyleConstants as Styler
 
@@ -104,10 +105,12 @@ object Logger {
     }
 
     fun append(msg: String, style: MutableAttributeSet = defaultStyle): Logger {
-        doc.insertString(doc.length, msg, style)
+        execute {
+            doc.insertString(doc.length, msg, style)
 
-        /* move the cursor at the end */
-        textComponent.caretPosition = doc.length
+            /* move the cursor at the end */
+            textComponent.caretPosition = doc.length
+        }
 
         return this
     }

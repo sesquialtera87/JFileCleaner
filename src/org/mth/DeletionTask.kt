@@ -7,30 +7,21 @@ import javax.swing.SwingWorker
 
 
 class DeletionTask(val directory: File, val extensions: Set<String>, val toTrash: Boolean, val recursive: Boolean) :
-    SwingWorker<Unit, Unit>() {
+    SwingWorker<Unit, DeletionTask.DeletionOutcome>() {
 
     var deletionCounter = 0
 
     override fun doInBackground() {
         Logger.message(formattedTimeStamp(), Logger.timestampStyle)
 
-        if (recursive)
-            recursiveDeletion(directory)
-        else {
-            val files = directory.listFiles()!!
-                .filter { it.isFile }
-                .filter { it.extension() in extensions }
+        recursiveDeletion(directory)
+    }
 
-            if (files.isEmpty()) {
-                Logger.message("Nothing to do")
-                return
-            }
+    override fun done() {
+        if (isCancelled)
+            Logger.message("Deletion task cancelled", Logger.warningStyle)
 
-            if (toTrash)
-                moveFilesToTrash(files)
-            else
-                deleteFiles(files)
-        }
+        Logger.message("$deletionCounter files deleted\n", Logger.greenStyle)
     }
 
     private fun recursiveDeletion(path: File) {
@@ -45,14 +36,28 @@ class DeletionTask(val directory: File, val extensions: Set<String>, val toTrash
             else
                 deleteFiles(files.filter { it.extension() in extensions })
 
-            directories.forEach { recursiveDeletion(it) }
+            // proceed in recursion
+            if (recursive)
+                for (dir in directories) {
+                    if (isCancelled) {
+                        System.err.println("Task canceled")
+                        break
+                    }
+
+                    recursiveDeletion(dir)
+                }
         }
     }
 
     private fun deleteFiles(files: List<File>) {
         val bold = Logger.defaultStyle.bold()
 
-        files.forEach {
+        for (it in files) {
+            if (isCancelled) {
+                System.err.println("Task canceled")
+                break
+            }
+
             try {
                 val succeeded = it.delete()
 
@@ -69,51 +74,38 @@ class DeletionTask(val directory: File, val extensions: Set<String>, val toTrash
                 Logger.message("- Cannot delete ${it.name}")
             }
         }
-
-        Logger.message("$deletionCounter files deleted\n", Logger.greenStyle)
     }
 
-    private fun File.toTrash(): Boolean {
+    override fun process(chunks: MutableList<DeletionOutcome>) {
         val bold = Logger.defaultStyle.bold()
 
+        chunks.forEach {
+            if (it.deletionDone) {
+                deletionCounter++
+
+                Logger.append("- ")
+                    .append(it.file.name, bold)
+                    .append(" deleted\n")
+            } else
+                Logger.message("- Cannot delete ${it.file.name}")
+        }
+    }
+
+    /**
+     * Move a file to the system trash
+     */
+    private fun File.toTrash(): Boolean {
         try {
             val succeeded = Desktop.getDesktop().moveToTrash(this)
 
-            if (succeeded) {
-                deletionCounter++
-                Logger.append("- ")
-                    .append(this.name, bold)
-                    .append(" deleted\n")
-            } else
-                Logger.message("- Cannot delete ${this.name}")
+            publish(DeletionOutcome(this, succeeded))
         } catch (e: SecurityException) {
-            Logger.message("- Cannot delete ${this.name}")
+            publish(DeletionOutcome(this, false))
             return false
         }
 
         return true
     }
 
-    private fun moveFilesToTrash(files: List<File>) {
-        val bold = Logger.defaultStyle.bold()
-
-        files.forEach {
-            try {
-                val succeeded = Desktop.getDesktop().moveToTrash(it)
-
-                if (succeeded) {
-                    deletionCounter++
-                    Logger.append("- ")
-                        .append(it.name, bold)
-                        .append(" deleted\n")
-                } else
-                    Logger.message("- Cannot delete ${it.name}")
-            } catch (e: SecurityException) {
-                Logger.message("- Cannot delete ${it.name}")
-            }
-        }
-
-        Logger.message("$deletionCounter files trashed\n", Logger.greenStyle)
-    }
-
+    data class DeletionOutcome(val file: File, val deletionDone: Boolean)
 }

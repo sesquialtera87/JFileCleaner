@@ -201,7 +201,11 @@ fun formattedTimeStamp(): String {
  * Shortcut for [SwingUtilities.invokeLater]
  */
 fun execute(runnable: Runnable) {
-    SwingUtilities.invokeLater { runnable.run() }
+
+    if (SwingUtilities.isEventDispatchThread())
+        runnable.run()
+    else
+        SwingUtilities.invokeLater { runnable.run() }
 }
 
 
