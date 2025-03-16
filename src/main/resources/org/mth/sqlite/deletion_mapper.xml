@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!--
+  ~ Copyright (c) 2025 Mattia Marelli
+  ~
+  ~ Permission is hereby granted, free of charge, to any person
+  ~ obtaining a copy of this software and associated documentation
+  ~ files (the "Software"), to deal in the Software without
+  ~ restriction, including without limitation the rights to use,
+  ~ copy, modify, merge, publish, distribute, sublicense, and/or sell
+  ~ copies of the Software, and to permit persons to whom the
+  ~ Software is furnished to do so, subject to the following
+  ~ conditions:
+  ~
+  ~ The above copyright notice and this permission notice shall be
+  ~ included in all copies or substantial portions of the Software.
+  ~
+  ~ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  ~ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+  ~ OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  ~ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+  ~ HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+  ~ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+  ~ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+  ~ OTHER DEALINGS IN THE SOFTWARE.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="deletions">
+    <resultMap id="DeletionRecordMap" type="DeletionRecord">
+        <result column="extension" javaType="string" property="extension"/>
+        <result column="timestamp" javaType="string" property="timestamp"/>
+        <result column="path" javaType="string" property="path"/>
+        <result column="trashed" javaType="byte" property="trashed"/>
+        <result column="size" javaType="long" property="size"/>
+    </resultMap>
+
+    <insert id="insert-deletion-record" statementType="PREPARED" useGeneratedKeys="false" parameterType="DeletionRecord">
+        INSERT INTO deletions (path, extension, size, trashed, timestamp)
+        VALUES ( #{path}, #{extension}, #{size}, #{trashed}, #{timestamp} )
+    </insert>
+
+    <select id="select-all-records" resultType="DeletionRecord">
+        SELECT timestamp, extension, path, trashed, size
+        FROM deletions
+        ORDER BY timestamp DESC, extension ASC
+    </select>
+
+    <select id="get-years" resultType="int">
+        SELECT DISTINCT year
+        FROM detailed_time
+        ORDER BY year DESC
+    </select>
+
+    <select id="get-months" resultType="string">
+        SELECT DISTINCT month
+        FROM detailed_time
+        ORDER BY month DESC
+    </select>
+
+    <select id="get-months-for-year" parameterType="int" resultType="int">
+        SELECT DISTINCT CAST(month AS integer) as mnt
+        FROM detailed_time
+        WHERE year+0 = #{year}
+        ORDER BY mnt DESC
+    </select>
+
+    <select id="get-by-month" parameterType="java.util.Map" resultType="DeletionRecord">
+        SELECT month, timestamp, extension, path, trashed, size
+        FROM detailed_time
+        WHERE month+0 = #{month} AND year+0 = #{year}
+        ORDER BY extension DESC
+    </select>
+
+    <select id="get-days-in-month" parameterType="java.util.Map" resultType="int">
+        SELECT DISTINCT day+0
+        FROM detailed_time
+        WHERE month+0 = #{month} AND year+0 = #{year}
+        ORDER BY day DESC
+    </select>
+
+    <select id="get-by-day" parameterType="java.util.Map" resultType="DeletionRecord">
+        SELECT *
+        FROM detailed_time
+        WHERE month+0 = #{month} AND year+0 = #{year} AND day+0 = #{day}
+        ORDER BY extension DESC
+    </select>
+
+    <delete id="delete-by-day" parameterType="java.util.Map">
+        DELETE FROM deletions
+        WHERE strftime('%d', timestamp/1000,'auto','localtime') = #{day}
+        AND strftime('%m', timestamp/1000,'auto','localtime') = #{month}
+        AND strftime('%Y', timestamp/1000,'auto','localtime') = #{year}
+    </delete>
+
+    <delete id="delete-by-month" parameterType="java.util.Map">
+        DELETE FROM deletions
+        WHERE strftime('%m', timestamp/1000,'auto','localtime') = #{month}
+        AND strftime('%Y', timestamp/1000,'auto','localtime') = #{year}
+    </delete>
+</mapper>

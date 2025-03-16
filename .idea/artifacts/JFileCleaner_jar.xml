@@ -1,21 +1,27 @@
 <component name="ArtifactManager">
-  <artifact type="jar" name="JFileCleaner:jar">
+  <artifact name="JFileCleaner:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/JFileCleaner_jar</output-path>
-    <root id="archive" name="JFileCleaner.jar">
-      <element id="module-output" name="JFileCleaner" />
-      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/kordamp/ikonli/ikonli-core/12.3.1/ikonli-core-12.3.1.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/kordamp/ikonli/ikonli-fontawesome-pack/12.2.0/ikonli-fontawesome-pack-12.2.0.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/kordamp/ikonli/ikonli-core/12.2.0/ikonli-core-12.2.0.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/formdev/flatlaf/2.3/flatlaf-2.3.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/kordamp/ikonli/ikonli-fontawesome5-pack/12.2.0/ikonli-fontawesome5-pack-12.2.0.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/mybatis/mybatis/3.5.10/mybatis-3.5.10.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/xerial/sqlite-jdbc/3.39.3.0/sqlite-jdbc-3.39.3.0.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/kordamp/ikonli/ikonli-swing/12.2.0/ikonli-swing-12.2.0.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/net/java/dev/jna/jna-platform/5.12.1/jna-platform-5.12.1.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/net/java/dev/jna/jna/5.12.1/jna-5.12.1.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$KOTLIN_BUNDLED$/lib/kotlin-stdlib.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$KOTLIN_BUNDLED$/lib/kotlin-reflect.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$KOTLIN_BUNDLED$/lib/kotlin-test.jar" path-in-jar="/" />
+    <root id="root">
+      <element id="archive" name="JFileCleaner.jar">
+        <element id="module-output" name="JFileCleaner" />
+      </element>
+      <element id="library" level="project" name="Maven: org.tinylog:tinylog-api:2.7.0" />
+      <element id="library" level="project" name="Maven: com.github.weisj:jsvg:1.2.0" />
+      <element id="library" level="project" name="Maven: com.formdev:flatlaf:3.5" />
+      <element id="library" level="project" name="Maven: org.jetbrains:annotations:13.0" />
+      <element id="library" level="project" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.0" />
+      <element id="library" level="project" name="Maven: com.formdev:flatlaf-extras:3.4" />
+      <element id="library" level="project" name="Maven: org.tinylog:tinylog-impl:2.7.0" />
+      <element id="library" level="module" name="Maven: com.sample:TimingFramework:0.55" module-name="JFileCleaner" />
+      <element id="library" level="project" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.0.0" />
+      <element id="library" level="project" name="Maven: org.kordamp.ikonli:ikonli-swing:12.3.1" />
+      <element id="library" level="project" name="Maven: org.kordamp.ikonli:ikonli-core:12.3.1" />
+      <element id="library" level="project" name="Maven: org.jetbrains.kotlin:kotlin-stdlib:2.0.0" />
+      <element id="library" level="project" name="Maven: com.miglayout:miglayout-swing:11.3" />
+      <element id="library" level="project" name="Maven: com.miglayout:miglayout-core:11.3" />
+      <element id="library" level="project" name="Maven: org.mybatis:mybatis:3.5.13" />
+      <element id="library" level="project" name="Maven: org.xerial:sqlite-jdbc:3.41.2.2" />
+      <element id="library" level="project" name="Maven: org.kordamp.ikonli:ikonli-fontawesome5-pack:12.3.1" />
     </root>
   </artifact>
 </component>

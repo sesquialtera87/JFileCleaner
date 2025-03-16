@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="DBNavigator.Project.DDLFileAttachmentManager">
+    <mappings />
+    <preferences />
+  </component>
   <component name="DBNavigator.Project.DataEditorManager">
     <record-view-column-sorting-type value="BY_INDEX" />
     <value-preview-text-wrapping value="false" />
@@ -21,6 +25,16 @@
       <charset value="windows-1252" />
     </export-instructions>
   </component>
+  <component name="DBNavigator.Project.DatabaseAssistantManager">
+    <assistants>
+      <assistant-state connection-id="15e5db74-0e37-48f9-9d7b-05777b46cbaa" default-profile-name="" selected-profile-name="" selected-model-name="" assistant-type="GENERIC" selected-action="SHOW_SQL" availability="UNAVAILABLE" acknowledgement="NONE">
+        <messages />
+      </assistant-state>
+      <assistant-state connection-id="20034252-9344-4d9a-9c5c-830c4bb186ac" default-profile-name="" selected-profile-name="" selected-model-name="" assistant-type="GENERIC" selected-action="SHOW_SQL" availability="UNAVAILABLE" acknowledgement="NONE">
+        <messages />
+      </assistant-state>
+    </assistants>
+  </component>
   <component name="DBNavigator.Project.DatabaseBrowserManager">
     <autoscroll-to-editor value="false" />
     <autoscroll-from-editor value="true" />
@@ -36,15 +50,80 @@ recursive=0;
 
 select * from "Folders"]]></console>
     </connection>
+    <connection id="20034252-9344-4d9a-9c5c-830c4bb186ac">
+      <console name="Connection" type="STANDARD" schema="main" session="Main"><![CDATA[--create view  detailed_time (
+--    time_stamp, 
+--    year,
+--    month,
+--    day
+--) 
+--as 
+--select 
+--    datetime(timestamp/1000,'auto','localtime'),
+--    strftime('%Y', timestamp/1000,'auto','localtime') ,
+--    strftime('%m', timestamp/1000,'auto','localtime') ,
+--    strftime('%d', timestamp/1000,'auto','localtime') 
+--from deletions 
+
+ create view if not exists detailed_time (
+        timestamp,
+        year,
+        month,
+        day,
+        path,
+        extension,
+        size,
+        trashed
+        )
+        as select
+        datetime(timestamp/1000,'auto','localtime'),
+        strftime('%Y', timestamp/1000,'auto','localtime'),
+        strftime('%m', timestamp/1000,'auto','localtime'),
+        strftime('%d', timestamp/1000,'auto','localtime'),
+        path,
+        extension,
+        size,
+        trashed
+        FROM deletions;
+        
+create view if not exists detailed_time (
+        timestamp,
+        date,
+        year,
+        month,
+        day,
+        path,
+        extension,
+        size,
+        trashed
+        )
+        as select
+        timestamp,
+        datetime(timestamp/1000,'auto','localtime'),
+        strftime('%Y', timestamp/1000,'auto','localtime'),
+        strftime('%m', timestamp/1000,'auto','localtime'),
+        strftime('%d', timestamp/1000,'auto','localtime'),
+        path,
+        extension,
+        size,
+        trashed
+        FROM deletions]]></console>
+    </connection>
+  </component>
+  <component name="DBNavigator.Project.DatabaseEditorStateManager">
+    <last-used-providers />
   </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
     <open-files />
   </component>
   <component name="DBNavigator.Project.DatabaseSessionManager">
     <connection id="15e5db74-0e37-48f9-9d7b-05777b46cbaa" />
+    <connection id="20034252-9344-4d9a-9c5c-830c4bb186ac" />
   </component>
   <component name="DBNavigator.Project.DatasetFilterManager">
     <filter-actions connection-id="15e5db74-0e37-48f9-9d7b-05777b46cbaa" dataset="main.Folders" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="20034252-9344-4d9a-9c5c-830c4bb186ac" dataset="main.detailed_time" active-filter-id="" />
+    <filter-actions connection-id="20034252-9344-4d9a-9c5c-830c4bb186ac" dataset="main.deletions" active-filter-id="EMPTY_FILTER" />
   </component>
   <component name="DBNavigator.Project.EditorStateManager">
     <last-used-providers />
@@ -82,19 +161,24 @@ select * from "Folders"]]></console>
           <database-type value="SQLITE" />
           <config-type value="BASIC" />
           <database-version value="3.39" />
-          <driver-source value="BUILTIN" />
+          <driver-source value="BUNDLED" />
           <driver-library value="" />
           <driver value="" />
           <url-type value="FILE" />
           <host value="" />
           <port value="" />
           <database value="" />
+          <tns-folder value="" />
+          <tns-profile value="" />
           <files>
             <file path="C:\Users\matti\OneDrive\Documenti\Java\JFileCleaner\src\org\mth\sqlite\database.sqlite" schema="main" />
           </files>
           <type value="NONE" />
           <user value="" />
-          <deprecated-pwd value="" />
+          <token-type value="" />
+          <token-config-file value="" />
+          <token-profile value="" />
+          <session-user value="" />
         </database>
         <properties>
           <auto-commit value="true" />
@@ -104,10 +188,8 @@ select * from "Folders"]]></console>
           <proxy-host value="" />
           <proxy-port value="22" />
           <proxy-user value="" />
-          <deprecated-proxy-pwd value="" />
           <auth-type value="PASSWORD" />
           <key-file value="" />
-          <key-passphrase value="" />
         </ssh-settings>
         <ssl-settings>
           <active value="false" />
@@ -131,8 +213,17 @@ select * from "Folders"]]></console>
           <max-connection-pool-size value="7" />
           <alternative-statement-delimiter value="" />
         </details>
-        <object-filters hide-empty-schemas="false" hide-pseudo-columns="false">
-          <object-type-filter>
+        <debugger>
+          <compile-dependencies value="true" />
+          <tcp-driver-tunneling value="false" />
+          <tcp-host-address value="" />
+          <tcp-port-from value="4000" />
+          <tcp-port-to value="4999" />
+          <debugger-type value="ASK" />
+        </debugger>
+        <object-filters hide-empty-schemas="false" hide-pseudo-columns="false" hide-audit-columns="false">
+          <object-filters />
+          <object-type-filter use-master-settings="true">
             <object-type name="SCHEMA" enabled="true" />
             <object-type name="USER" enabled="true" />
             <object-type name="ROLE" enabled="true" />
@@ -155,11 +246,120 @@ select * from "Folders"]]></console>
             <object-type name="TYPE" enabled="true" />
             <object-type name="TYPE_ATTRIBUTE" enabled="true" />
             <object-type name="ARGUMENT" enabled="true" />
+            <object-type name="JAVA_CLASS" enabled="true" />
+            <object-type name="JAVA_INNER_CLASS" enabled="true" />
+            <object-type name="JAVA_FIELD" enabled="true" />
+            <object-type name="JAVA_METHOD" enabled="true" />
             <object-type name="DIMENSION" enabled="true" />
             <object-type name="CLUSTER" enabled="true" />
             <object-type name="DBLINK" enabled="true" />
+            <object-type name="CREDENTIAL" enabled="true" />
+            <object-type name="AI_PROFILE" enabled="true" />
           </object-type-filter>
-          <object-name-filters />
+        </object-filters>
+      </connection>
+      <connection id="20034252-9344-4d9a-9c5c-830c4bb186ac" active="true" signed="true">
+        <database>
+          <name value="Connection" />
+          <description value="" />
+          <database-type value="SQLITE" />
+          <config-type value="BASIC" />
+          <database-version value="3.49" />
+          <driver-source value="BUNDLED" />
+          <driver-library value="" />
+          <driver value="" />
+          <url-type value="FILE" />
+          <host value="" />
+          <port value="" />
+          <database value="" />
+          <tns-folder value="" />
+          <tns-profile value="" />
+          <files>
+            <file path="C:\Users\matti\OneDrive\Documenti\Java\JFileCleaner\src\main\resources\org\mth\sqlite\db.sqlite" schema="main" />
+          </files>
+          <type value="NONE" />
+          <user value="" />
+          <token-type value="" />
+          <token-config-file value="" />
+          <token-profile value="" />
+          <session-user value="" />
+        </database>
+        <properties>
+          <auto-commit value="true" />
+        </properties>
+        <ssh-settings>
+          <active value="false" />
+          <proxy-host value="" />
+          <proxy-port value="22" />
+          <proxy-user value="" />
+          <auth-type value="PASSWORD" />
+          <key-file value="" />
+        </ssh-settings>
+        <ssl-settings>
+          <active value="false" />
+          <certificate-authority-file value="" />
+          <client-certificate-file value="" />
+          <client-key-file value="" />
+        </ssl-settings>
+        <details>
+          <charset value="UTF-8" />
+          <session-management value="true" />
+          <ddl-file-binding value="true" />
+          <database-logging value="true" />
+          <connect-automatically value="true" />
+          <restore-workspace value="true" />
+          <restore-workspace-deep value="false" />
+          <environment-type value="default" />
+          <connectivity-timeout value="30" />
+          <idle-time-to-disconnect value="30" />
+          <idle-time-to-disconnect-pool value="5" />
+          <credential-expiry-time value="10" />
+          <max-connection-pool-size value="7" />
+          <alternative-statement-delimiter value="" />
+        </details>
+        <debugger>
+          <compile-dependencies value="true" />
+          <tcp-driver-tunneling value="false" />
+          <tcp-host-address value="" />
+          <tcp-port-from value="4000" />
+          <tcp-port-to value="4999" />
+          <debugger-type value="ASK" />
+        </debugger>
+        <object-filters hide-empty-schemas="false" hide-pseudo-columns="false" hide-audit-columns="false">
+          <object-filters />
+          <object-type-filter use-master-settings="true">
+            <object-type name="SCHEMA" enabled="true" />
+            <object-type name="USER" enabled="true" />
+            <object-type name="ROLE" enabled="true" />
+            <object-type name="PRIVILEGE" enabled="true" />
+            <object-type name="CHARSET" enabled="true" />
+            <object-type name="TABLE" enabled="true" />
+            <object-type name="VIEW" enabled="true" />
+            <object-type name="MATERIALIZED_VIEW" enabled="true" />
+            <object-type name="NESTED_TABLE" enabled="true" />
+            <object-type name="COLUMN" enabled="true" />
+            <object-type name="INDEX" enabled="true" />
+            <object-type name="CONSTRAINT" enabled="true" />
+            <object-type name="DATASET_TRIGGER" enabled="true" />
+            <object-type name="DATABASE_TRIGGER" enabled="true" />
+            <object-type name="SYNONYM" enabled="true" />
+            <object-type name="SEQUENCE" enabled="true" />
+            <object-type name="PROCEDURE" enabled="true" />
+            <object-type name="FUNCTION" enabled="true" />
+            <object-type name="PACKAGE" enabled="true" />
+            <object-type name="TYPE" enabled="true" />
+            <object-type name="TYPE_ATTRIBUTE" enabled="true" />
+            <object-type name="ARGUMENT" enabled="true" />
+            <object-type name="JAVA_CLASS" enabled="true" />
+            <object-type name="JAVA_INNER_CLASS" enabled="true" />
+            <object-type name="JAVA_FIELD" enabled="true" />
+            <object-type name="JAVA_METHOD" enabled="true" />
+            <object-type name="DIMENSION" enabled="true" />
+            <object-type name="CLUSTER" enabled="true" />
+            <object-type name="DBLINK" enabled="true" />
+            <object-type name="CREDENTIAL" enabled="true" />
+            <object-type name="AI_PROFILE" enabled="true" />
+          </object-type-filter>
         </object-filters>
       </connection>
     </connections>
@@ -168,6 +368,7 @@ select * from "Folders"]]></console>
         <display-mode value="TABBED" />
         <navigation-history-size value="100" />
         <show-object-details value="false" />
+        <enable-sticky-paths value="true" />
       </general>
       <filters>
         <object-type-filter>
@@ -193,9 +394,15 @@ select * from "Folders"]]></console>
           <object-type name="TYPE" enabled="true" />
           <object-type name="TYPE_ATTRIBUTE" enabled="true" />
           <object-type name="ARGUMENT" enabled="true" />
+          <object-type name="JAVA_CLASS" enabled="true" />
+          <object-type name="JAVA_INNER_CLASS" enabled="true" />
+          <object-type name="JAVA_FIELD" enabled="true" />
+          <object-type name="JAVA_METHOD" enabled="true" />
           <object-type name="DIMENSION" enabled="true" />
           <object-type name="CLUSTER" enabled="true" />
           <object-type name="DBLINK" enabled="true" />
+          <object-type name="CREDENTIAL" enabled="true" />
+          <object-type name="AI_PROFILE" enabled="true" />
         </object-type-filter>
       </filters>
       <sorting>
@@ -232,9 +439,15 @@ select * from "Folders"]]></console>
           <object-type name="FUNCTION" enabled="true" />
           <object-type name="PACKAGE" enabled="true" />
           <object-type name="TYPE" enabled="true" />
+          <object-type name="JAVA CLASS" enabled="true" />
+          <object-type name="INNER CLASS" enabled="true" />
+          <object-type name="JAVA FIELD" enabled="true" />
+          <object-type name="JAVA METHOD" enabled="true" />
+          <object-type name="JAVA PARAMETER" enabled="true" />
           <object-type name="DIMENSION" enabled="false" />
           <object-type name="CLUSTER" enabled="false" />
           <object-type name="DBLINK" enabled="true" />
+          <object-type name="CREDENTIAL" enabled="false" />
         </lookup-objects>
         <force-database-load value="false" />
         <prompt-connection-selection value="true" />
@@ -294,7 +507,6 @@ select * from "Folders"]]></console>
           <content-type name="JSON" enabled="true" />
           <content-type name="JSON5" enabled="true" />
           <content-type name="Groovy" enabled="true" />
-          <content-type name="AIDL" enabled="true" />
           <content-type name="YAML" enabled="true" />
           <content-type name="Manifest" enabled="true" />
         </content-types>
@@ -313,6 +525,7 @@ select * from "Folders"]]></console>
       <confirmations>
         <save-changes value="false" />
         <revert-changes value="true" />
+        <exit-on-changes value="ASK" />
       </confirmations>
     </code-editor-settings>
     <code-completion-settings>
@@ -511,10 +724,6 @@ select * from "Folders"]]></console>
         <compile-dependencies value="ASK" />
         <always-show-controls value="false" />
       </compiler>
-      <debugger>
-        <debugger-type value="ASK" />
-        <use-generic-runners value="true" />
-      </debugger>
     </operation-settings>
     <ddl-file-settings>
       <extensions>
@@ -528,6 +737,7 @@ select * from "Folders"]]></console>
         <mapping file-type-id="TYPE" extensions="tpe" />
         <mapping file-type-id="TYPE_SPEC" extensions="tps" />
         <mapping file-type-id="TYPE_BODY" extensions="tpb" />
+        <mapping file-type-id="JAVA_SOURCE" extensions="sql" />
       </extensions>
       <general>
         <lookup-ddl-files value="true" />
@@ -537,6 +747,11 @@ select * from "Folders"]]></console>
         <make-scripts-rerunnable value="true" />
       </general>
     </ddl-file-settings>
+    <assistant-settings>
+      <credential-settings>
+        <credentials />
+      </credential-settings>
+    </assistant-settings>
     <general-settings>
       <regional-settings>
         <date-format value="MEDIUM" />
@@ -563,5 +778,6 @@ select * from "Folders"]]></console>
   </component>
   <component name="DBNavigator.Project.StatementExecutionManager">
     <execution-variables />
+    <execution-variable-types />
   </component>
 </project>
