@@ -1,0 +1,20 @@
+= JFC - The Java File Extension Cleaner
+Mattia Marelli <sesquialtera87@gmail.org>;
+v1.0, 2025-03-17
+
+Born from the need to bulk-delete a certain amount of useless files derived from some compilers tools, this simple application show the file-extensions contained into the selected directory to easily remove them.
+
+== Directory selection
+A filesystem directory can be specified by choose one with the file-chooser dialog, by drag-and-drop a folder onto the textfield or simply by typing the path in the textfield.
+
+The textfield offers an autocompletion feature to show the subdirectories of the current typed path. The textfield has the following hotkeys:
+
+* `CTRL+SPACE` to show the autocompletion popup
+* `CTRL+SHIFT+SPACE` to show the full path-history
+* `SHIFT+BACKSPACE` to delete the current subdirectory
+
+== Options
+Only two simple options are implemented.
+
+* *Use System Trash* By activating this option, you will exploit the `java.awt.Desktop` class and its `moveToTrash` method to remove the selected file and put them into the system trash. This option can be disabled if the trashing capability is not supported by the system (this is checked with `Desktop.isSupported` method)
+* *Recurse in subfolders* With this option the deletion process go down into every subdirectory, searching for the selected extensions and deleting them.
