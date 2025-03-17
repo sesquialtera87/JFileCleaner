@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch4jConfig>
+    <dontWrapJar>false</dontWrapJar>
+    <headerType>gui</headerType>
+    <jar>C:\Users\matti\OneDrive\Documenti\Java\JFileCleaner\out\artifacts\JFileCleaner_jar\JFileCleaner.jar</jar>
+    <outfile>C:\Users\matti\OneDrive\Documenti\Java\JFileCleaner\out\artifacts\JFileCleaner_jar\jfc.exe</outfile>
+    <errTitle/>
+    <cmdLine/>
+    <chdir>.</chdir>
+    <priority>normal</priority>
+    <downloadUrl>https://bell-sw.com/pages/downloads/#jdk-21-lts</downloadUrl>
+    <supportUrl/>
+    <stayAlive>false</stayAlive>
+    <restartOnCrash>false</restartOnCrash>
+    <manifest/>
+    <icon>C:\Users\matti\OneDrive\Documenti\Java\JFileCleaner\out\artifacts\JFileCleaner_jar\clear.ico</icon>
+    <jre>
+        <path>%JAVA_HOME%;%PATH%</path>
+        <requiresJdk>false</requiresJdk>
+        <requires64Bit>false</requires64Bit>
+        <minVersion>17.0.0</minVersion>
+        <maxVersion/>
+    </jre>
+    <versionInfo>
+        <fileVersion>1.0.0.0</fileVersion>
+        <txtFileVersion>1.0.0</txtFileVersion>
+        <fileDescription>File Extension Cleaner</fileDescription>
+        <copyright>2025</copyright>
+        <productVersion>1.0.0.0</productVersion>
+        <txtProductVersion>1.0.0</txtProductVersion>
+        <productName>JFC</productName>
+        <companyName/>
+        <internalName>org.mth.jfc</internalName>
+        <originalFilename>jfc.exe</originalFilename>
+        <trademarks/>
+        <language>ENGLISH_US</language>
+    </versionInfo>
+</launch4jConfig>
