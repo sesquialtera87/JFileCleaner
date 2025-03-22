@@ -20,4 +20,4 @@ Only two simple options are implemented.
 * *Recurse in subfolders* With this option the deletion process go down into every subdirectory, searching for the selected extensions and deleting them.
 
 == Installation and run
-Actually the application is tested only on Windows and run with a JRE not lower than 17.0.0. The zipped package can be downloaded from the https://github.com/sesquialtera87/JFileCleaner/releases[release page] and could be extracted wherever you want on your local filesystem. The application then can be launched by running the `JFileCleaner.jar` or by using the `exe` provided in the package.
+Currently the application is tested only on Windows and run with a JRE not lower than 17. The zipped package can be downloaded from the https://github.com/sesquialtera87/JFileCleaner/releases[release page] and could be extracted wherever you want on your local filesystem. The application then can be launched by running the `JFileCleaner.jar` or through the `exe` provided in the package.
